@@ -52,6 +52,9 @@ jobs:
           forge --version
           git -C relay-settlement rev-parse HEAD
 
+      - name: Inject cross-order residual-token regression PoC
+        run: python3 scripts/inject-cross-order-test.py
+
       - name: Run Relay-chain Foundry tests
         working-directory: relay-settlement/contracts/relay-chain
         run: forge test -vvv
