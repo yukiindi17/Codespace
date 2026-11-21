@@ -21,7 +21,7 @@ async function scanFastMintLogs(){
   let from=0n,span=20_000n;const out=[];
   while(from<=latest){
     const to=from+span-1n>latest?latest:from+span-1n;
-    try{out.push(...await client.getLogs({address:INBOX,event:abi[0],fromBlock:from,toBlock:to}));from=to+1n}
+    try{out.push(...await client.getLogs({address:INBOX,event:eventAbi[0],fromBlock:from,toBlock:to}));from=to+1n}
     catch(e){if(span<=1n)throw new Error("FastMint logs "+from+"-"+to+": "+(e.shortMessage||e.message));span/=2n}
   }
   return out;
@@ -59,8 +59,8 @@ for(const log of logs){
   }catch(e){stats.decodeErrors.push({tx:log.transactionHash,error:e.shortMessage||e.message})}
 }
 const [limiterAllowed,feeCalculatorAllowed,limiterCode,feeCalculatorCode]=await Promise.all([
-  client.readContract({address:INBOX,abi,functionName:"isRateLimiter",args:[MANIFEST_LIMITER]}),
-  client.readContract({address:INBOX,abi,functionName:"isFeeCalculator",args:[MANIFEST_FEE_CALCULATOR]}),
+  client.readContract({address:INBOX,abi:stateAbi,functionName:"isRateLimiter",args:[MANIFEST_LIMITER]}),
+  client.readContract({address:INBOX,abi:stateAbi,functionName:"isFeeCalculator",args:[MANIFEST_FEE_CALCULATOR]}),
   client.getCode({address:MANIFEST_LIMITER}),client.getCode({address:MANIFEST_FEE_CALCULATOR})
 ]);
 console.log(JSON.stringify({
