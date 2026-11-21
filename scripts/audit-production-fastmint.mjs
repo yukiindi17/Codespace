@@ -14,8 +14,8 @@ const eventAbi = parseAbi([
   "event FastMint(bytes32 indexed idempotencyKey,address hubToAddress,uint256 hubTokenId,uint256 amount,uint256 feeCurrency,uint256 feeAmount,address feeRecipient,address feePayer)"
 ]);
 const executeAbi = parseAbi([
-  "function execute((bytes32 idempotencyKey,bytes[] actions) execution,address oracle,bytes signature)",
-  "function executeMultiple((bytes32 idempotencyKey,bytes[] actions)[] executions,address oracle,bytes[] signatures)"
+  "function execute((bytes32 idempotencyKey,bytes[] actions,uint256 expiration) execution,address oracle,bytes signature)",
+  "function executeMultiple((bytes32 idempotencyKey,bytes[] actions,uint256 expiration)[] executions,address oracle,bytes[] signatures)"
 ]);
 const wrapperAbi = parseAbi([
   "function aggregate3((address target,bool allowFailure,bytes callData)[] calls) payable returns ((bool success,bytes returnData)[] returnData)"
@@ -113,11 +113,11 @@ const [limiterAllowed, feeCalculatorAllowed, limiterCode, feeCalculatorCode] = a
 ]);
 
 console.log(JSON.stringify({
-  chainId, block: latest.toString(), oracleV2: ORACLE_V2,
+  chainId, block: latest.toString(), oracleAddress: ORACLE_V2,
   deploymentBlock: deploymentBlock.toString(), stats,
   manifestModules: {
     rateLimiter: { address: MANIFEST_LIMITER, hasCode: !!limiterCode && limiterCode !== "0x", allowlisted: limiterAllowed },
     feeCalculator: { address: MANIFEST_FEE_CALCULATOR, hasCode: !!feeCalculatorCode && feeCalculatorCode !== "0x", allowlisted: feeCalculatorAllowed }
   },
-  note: "Successful FAST_MINT events are decoded from nested Multicall3 aggregate3 calls. A zero rateLimiter would indicate an oracle-authorized bypass, not a permissionless bypass."
+  note: "The deployed oracle address is called through nested Multicall3 aggregate3 calls using the three-field RelayInbox Execution selector. A zero rateLimiter would indicate an oracle-authorized bypass, not a permissionless bypass."
 }, null, 2));
