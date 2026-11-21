@@ -1,0 +1,21 @@
+name: Relay production FAST_MINT module source verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/relay-fastmint-source-check.yml"
+      - "scripts/audit-fastmint-source-check.mjs"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Read verified production source and ABI
+        run: node scripts/audit-fastmint-source-check.mjs
