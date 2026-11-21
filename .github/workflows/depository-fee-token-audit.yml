@@ -32,7 +32,7 @@ jobs:
         run: |
           forge install foundry-rs/forge-std@8b531a016f15f761a632f5149a828228573420fc --no-commit
           forge install Vectorized/solady@acd959aa4bd04720d640bf4e6a5c71037510cc4b --no-commit
-      - name: Inject fee-on-transfer accounting test
+      - name: Link dependencies using the configured versioned paths\n        working-directory: relay-settlement/contracts/depository-evm\n        run: |\n          ln -s solady dependencies/solady-0.1.26\n          ln -s forge-std dependencies/forge-std-1.16.1-4-g8b531a0\n      - name: Inject fee-on-transfer accounting test
         run: python3 scripts/inject-depository-fee-token-test.py
       - name: Run EVM depository tests
         working-directory: relay-settlement/contracts/depository-evm
