@@ -61,6 +61,9 @@ test = r"""
     // The 10 residual tokens survive because _settleRequestTokens only
     // settles Order A's request input/output token pair.
     assertEq(IERC20(residualToken).balanceOf(address(drawResolver)), 10);
+    // App A funded the conversion: 20 units were debited, 5 unused units
+    // were returned, leaving its external-token pool balance down by 15.
+    assertEq(pool.balances(app, address(externalToken)), 85);
 
     // Order B's shortfall leg names that same token and a different account.
     address orderB = otherAccounts[4];
@@ -73,12 +76,20 @@ test = r"""
     secondLegs[0] = _shortfallLeg(platform, residualToken, 5);
     Call[] memory secondCalls = new Call[](1);
     secondCalls[0] = _hubSwap(tokenInId, tokenOutId, 100, 100);
-    _execute(
-      _request(
-        orderB,
-        100,
-        _prepare(orderB, secondLegs, secondCalls, bytes32(uint256(0xB1)))
-      )
+    ExecuteAndWithdrawRequest memory secondRequest = _request(
+      orderB,
+      100,
+      _prepare(orderB, secondLegs, secondCalls, bytes32(uint256(0xB1)))
+    );
+    // A third-party relayer can submit the exact, already oracle- and
+    // account-authorized payload; it cannot mutate the committed plan.
+    vm.prank(otherAccounts[5]);
+    executor.execute(
+      secondRequest,
+      address(drawResolver),
+      preparedPayload,
+      oracleSigner,
+      _signRequest(secondRequest)
     );
 
     // The resolver treats 10 old tokens as Order B's output, credits 5 to
