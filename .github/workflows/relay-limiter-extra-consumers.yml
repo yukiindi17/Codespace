@@ -1,0 +1,33 @@
+name: Relay limiter extra-consumer path audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/relay-limiter-extra-consumers.yml"
+      - "scripts/audit-limiter-extra-consumers.mjs"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: relayprotocol/relay-settlement
+          ref: v0.0.8
+          path: relay-settlement
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+          cache-dependency-path: relay-settlement/yarn.lock
+      - run: corepack enable
+      - run: yarn install --immutable
+        working-directory: relay-settlement
+      - name: Identify all production limiter consumers (read-only)
+        run: |
+          cp scripts/audit-limiter-extra-consumers.mjs relay-settlement/contracts/relay-chain/script/audit-limiter-extra-consumers.mjs
+          node relay-settlement/contracts/relay-chain/script/audit-limiter-extra-consumers.mjs
