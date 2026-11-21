@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/relay-baseline.yml"
+      - "scripts/inject-cross-order-test.py"
   workflow_dispatch:
 
 permissions:
