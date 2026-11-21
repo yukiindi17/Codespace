@@ -1,4 +1,4 @@
-import { createPublicClient, http, parseAbi, parseAbiParameters, decodeAbiParameters, getAddress, parseTransaction } from "viem";
+import { createPublicClient, http, parseAbi, parseAbiParameters, decodeAbiParameters, getAddress, decodeFunctionData } from "viem";
 
 const RPC = process.env.RELAY_RPC_URL || "https://rpc.chain.relay.link";
 const CHAIN_ID = 537713;
@@ -32,7 +32,7 @@ const zero="0x0000000000000000000000000000000000000000";
 for(const log of logs){
   try{
     const tx=await client.getTransaction({hash:log.transactionHash});
-    const parsed=parseTransaction({abi,data:tx.input});
+    const parsed=decodeFunctionData({abi,data:tx.input});
     let executions=[];
     if(parsed.functionName==="execute")executions=[parsed.args[0]];
     else if(parsed.functionName==="executeMultiple")executions=parsed.args[0];
