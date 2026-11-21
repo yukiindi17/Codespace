@@ -70,7 +70,7 @@ const events=parseAbi([
 ]);
 const [oldExecAll,oldExecRecent,oldFastAll,oldFastRecent]=await Promise.all([
  countLogs(A.legacyOracle,events[0],0n,latest,"old oracle Executed"),
- countLogs(A.legacyOracle,events[0],last100k,latest,"old oracle recent Executed"),
+ countLogs(A.legacyOracle,events[0],last10k,latest,"old oracle recent Executed"),
  countLogs(A.legacyOracle,events[1],0n,latest,"old oracle FastMint"),
  countLogs(A.legacyOracle,events[1],last100k,latest,"old oracle recent FastMint")
 ]);
@@ -79,15 +79,15 @@ const [oldExecutorEventsAll,oldExecutorEventsRecent]=await Promise.all([
  countLogs(A.legacyExecutor,parseAbi(["event Executed(address indexed orderAddress,uint256 indexed tokenIn,uint256 indexed tokenOut,uint256 amountIn,uint256 amountOut,bytes32 withdrawRequestHash)"])[0],last100k,latest,"old executor recent Executed")
 ]);
 console.log(JSON.stringify({
- chainId,block:latest.toString(),last100kBlocksFrom:last100k.toString(),last500kBlocksFrom:last500k.toString(),code,
+ chainId,block:latest.toString(),last10kBlocksFrom:last10k.toString(),last50kBlocksFrom:last50k.toString(),code,
  legacyStack:{
   allocator:A.legacyAllocator,allocatorOwner:oldAllocatorOwner,allocatorHub:oldAllocatorHub,
   executor:A.legacyExecutor,executorHub:oldExecHub,executorAllocator:oldExecAllocator,executorLinksToLegacyAllocator:oldExecAllocator.toLowerCase()===A.legacyAllocator.toLowerCase(),
   oracle:A.legacyOracle,oracleHub:oldOracleHub,oldOracleIdempotencyStore:oldStore,currentInboxIdempotencyStore:currentStore,sharedIdempotencyStore:oldStore.toLowerCase()===currentStore.toLowerCase(),
   oldOracleSignerActive,oldExecutorSignerActive,
   oldSignerMultisig:{address:A.oldSigner,owner:multiOwner,threshold:threshold.toString(),signers},
-  recentUsage:{oldOracleExecutedLast500k:oldExecAll,oldOracleExecutedLast100k:oldExecRecent,oldOracleFastMintLast500k:oldFastAll,oldOracleFastMintLast100k:oldFastRecent,oldExecutorExecutedLast500k:oldExecutorEventsAll,oldExecutorExecutedLast100k:oldExecutorEventsRecent}
+  recentUsage:{oldOracleExecutedLast50k:oldExecAll,oldOracleExecutedLast10k:oldExecRecent,oldOracleFastMintLast50k:oldFastAll,oldOracleFastMintLast10k:oldFastRecent,oldExecutorExecutedLast50k:oldExecutorEventsAll,oldExecutorExecutedLast10k:oldExecutorEventsRecent}
  },
  currentStack:{inbox:A.currentInbox,currentOracleMultisig:A.currentMultisig,currentSignerActive,currentExecutor:A.currentExecutor,oldSignerStillAuthorizedOnCurrentExecutor:currentExecOldSignerActive},
- note:"100k/500k blocks are block-height windows, not calendar durations. Event counts are activity indicators, not proof that every action moved funds."
+ note:"10k/50k blocks are block-height windows, not calendar durations. Event counts are activity indicators, not proof that every action moved funds."
 },null,2));
