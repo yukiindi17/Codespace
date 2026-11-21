@@ -18,7 +18,7 @@ const chainId=await client.getChainId();if(chainId!==CHAIN_ID)throw new Error("W
 const latest=await client.getBlockNumber();
 const allocatorAbi=parseAbi([
  "function owner() view returns (address)","function HUB() view returns (address)",
- "function paused() view returns (bool)","function pausedChains(string) view returns (bool)",
+ "function pausedChains(string) view returns (bool)",
  "function payloadBuilderCounts(string) view returns (uint256)"
 ]);
 const oracleAbi=parseAbi([
@@ -33,7 +33,7 @@ const executorAbi=parseAbi([
 const multisigAbi=parseAbi(["function owner() view returns (address)","function getSigners() view returns (address[])","function threshold() view returns (uint256)"]);
 const code={};
 for(const [k,a] of Object.entries(A)){if(["oldSigner","currentMultisig"].includes(k))continue;const c=await client.getCode({address:a});code[k]={address:a,hasCode:!!c&&c!=="0x",bytes:c&&c!=="0x"?(c.length-2)/2:0}}
-const [oldAllocatorOwner,oldAllocatorHub,oldPaused,oldExecHub,oldExecAllocator,oldOracleHub,oldStore,currentStore,oldOracleRole,oldExecutorRole,oldOracleSignerActive,oldExecSignerActive,currentOracleActive,currentExecOldSignerActive,multiOwner,signers,threshold]=await Promise.all([
+const [oldAllocatorOwner,oldAllocatorHub,oldExecHub,oldExecAllocator,oldOracleHub,oldStore,currentStore,oldOracleRole,oldExecutorRole,oldOracleSignerActive,oldExecSignerActive,currentOracleActive,currentExecOldSignerActive,multiOwner,signers,threshold]=await Promise.all([
  client.readContract({address:A.legacyAllocator,abi:allocatorAbi,functionName:"owner"}),
  client.readContract({address:A.legacyAllocator,abi:allocatorAbi,functionName:"HUB"}),
  client.readContract({address:A.legacyAllocator,abi:allocatorAbi,functionName:"paused"}),
@@ -82,7 +82,7 @@ const [oldExecutorEventsAll,oldExecutorEventsRecent]=await Promise.all([
 console.log(JSON.stringify({
  chainId,block:latest.toString(),last100kBlocksFrom:last100k.toString(),last500kBlocksFrom:last500k.toString(),code,
  legacyStack:{
-  allocator:A.legacyAllocator,allocatorOwner:oldAllocatorOwner,allocatorHub:oldAllocatorHub,allocatorPaused:oldPaused,
+  allocator:A.legacyAllocator,allocatorOwner:oldAllocatorOwner,allocatorHub:oldAllocatorHub,
   executor:A.legacyExecutor,executorHub:oldExecHub,executorAllocator:oldExecAllocator,executorLinksToLegacyAllocator:oldExecAllocator.toLowerCase()===A.legacyAllocator.toLowerCase(),
   oracle:A.legacyOracle,oracleHub:oldOracleHub,oldOracleIdempotencyStore:oldStore,currentInboxIdempotencyStore:currentStore,sharedIdempotencyStore:oldStore.toLowerCase()===currentStore.toLowerCase(),
   oldOracleSignerActive,oldExecutorSignerActive,
