@@ -36,7 +36,8 @@ jobs:
         working-directory: relay-settlement/contracts/depository-evm
         run: |
           ln -s solady dependencies/solady-0.1.26
-          ln -s forge-std dependencies/forge-std-1.16.1-4-g8b531a0\n      - name: Inject fee-on-transfer accounting test
+          ln -s forge-std dependencies/forge-std-1.16.1-4-g8b531a0
+      - name: Inject fee-on-transfer accounting test
         run: python3 scripts/inject-depository-fee-token-test.py
       - name: Run EVM depository tests
         working-directory: relay-settlement/contracts/depository-evm
