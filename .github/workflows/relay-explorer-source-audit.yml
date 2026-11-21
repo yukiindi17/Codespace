@@ -1,0 +1,25 @@
+name: Relay explorer source verification audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/relay-explorer-source-audit.yml"
+      - "scripts/fetch-relay-explorer-source.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-verified-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout harness repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Fetch explorer verification metadata for old and current builder contracts
+        run: node scripts/fetch-relay-explorer-source.mjs
