@@ -4,7 +4,7 @@ const RPC = process.env.RELAY_RPC_URL || "https://rpc.chain.relay.link";
 const CHAIN_ID = 537713;
 const A = {
   hub: getAddress("0xddd361727c22a01eb137880678a20b0beae69318"),
-  inbox: getAddress("0x30e6cd00d0f6553884b151c1b1b74fd59369ff41"),
+  oracleV2: getAddress("0x30e6cd00d0f6553884b151c1b1b74fd59369ff41"),
   executor: getAddress("0x946773048565893b6b6051a485c52e32e43cc2fe"),
   allocator: getAddress("0xa68dcb6ca9a7bc8cac147688f1cbfe68524b38c8"),
   oracleMultisig: getAddress("0x3036b2b6cc6172d0d306657855d4996f484a29f7"),
@@ -28,10 +28,10 @@ const hubAbi = parseAbi([
   "function getRoleAdmin(bytes32) view returns (bytes32)",
   "function isOperator(address,address) view returns (bool)",
 ]);
-const inboxAbi = parseAbi([
+const oracleV2Abi = parseAbi([
   "function ADMIN_ROLE() view returns (bytes32)",
   "function ORACLE_ROLE() view returns (bytes32)",
-  "function IDEMPOTENCY_STORE() view returns (address)",
+  "function IDEMPOTENCY_STORE() view returns (address)",\n  "function HUB() view returns (address)",
   "function hasRole(bytes32,address) view returns (bool)",
   "function isRateLimiter(address) view returns (bool)",
   "function isFeeCalculator(address) view returns (bool)",
@@ -42,7 +42,7 @@ const execAbi = parseAbi([
   "function hasRole(bytes32,address) view returns (bool)",
 ]);
 const allocAbi = parseAbi([
-  "function owner() view returns (address)",
+  "function owner() view returns (address)",\n  "function HUB() view returns (address)",
   "function ORACLE_MULTISIG() view returns (address)",
   "function suspended(address) view returns (bool)",
   "function payloadBuilders(string,bytes) view returns (address)",
@@ -66,9 +66,9 @@ const roleIds = {
     OPERATOR_ROLE: await client.readContract({address:A.hub,abi:hubAbi,functionName:"OPERATOR_ROLE"}),
     EDITOR_ROLE: await client.readContract({address:A.hub,abi:hubAbi,functionName:"EDITOR_ROLE"}),
   },
-  inbox: {
-    ADMIN_ROLE: await client.readContract({address:A.inbox,abi:inboxAbi,functionName:"ADMIN_ROLE"}),
-    ORACLE_ROLE: await client.readContract({address:A.inbox,abi:inboxAbi,functionName:"ORACLE_ROLE"}),
+  oracleV2: {
+    ADMIN_ROLE: await client.readContract({address:A.oracleV2,abi:oracleV2Abi,functionName:"ADMIN_ROLE"}),
+    ORACLE_ROLE: await client.readContract({address:A.oracleV2,abi:oracleV2Abi,functionName:"ORACLE_ROLE"}),
   },
   executor: {
     ADMIN_ROLE: await client.readContract({address:A.executor,abi:execAbi,functionName:"ADMIN_ROLE"}),
@@ -76,7 +76,7 @@ const roleIds = {
   }
 };
 const contracts = [
-  ["inbox",A.inbox],["executor",A.executor],["allocator",A.allocator],
+  ["oracleV2",A.oracleV2],["executor",A.executor],["allocator",A.allocator],
   ["oracleMultisig",A.oracleMultisig],["poolDrawResolver",A.poolDrawResolver],
   ["basicCallResolver",A.basicCallResolver],["protocolSafe",A.protocolSafe],
   ["config",A.config],["withdrawGasPayer",A.withdrawGasPayer],
@@ -94,11 +94,11 @@ for(const [name,role] of Object.entries(roleIds.hub)){
 }
 const contractCode={};
 for(const [name,address] of contracts){const code=await client.getCode({address});contractCode[name]={address,hasCode:!!code&&code!=="0x",bytes:code&&code!=="0x"?(code.length-2)/2:0};}
-const inboxRoles={};
-for(const [name,role] of Object.entries(roleIds.inbox)){
-  inboxRoles[name]={role,knownMembers:{}};
+const oracleV2Roles={};
+for(const [name,role] of Object.entries(roleIds.oracleV2)){
+  oracleV2Roles[name]={role,knownMembers:{}};
   for(const [label,address] of [["oracleMultisig",A.oracleMultisig],["protocolSafe",A.protocolSafe],["config",A.config],["withdrawGasPayer",A.withdrawGasPayer]]){
-    inboxRoles[name].knownMembers[label]=await client.readContract({address:A.inbox,abi:inboxAbi,functionName:"hasRole",args:[role,address]});
+    oracleV2Roles[name].knownMembers[label]=await client.readContract({address:A.oracleV2,abi:oracleV2Abi,functionName:"hasRole",args:[role,address]});
   }
 }
 const execRoles={};
@@ -108,12 +108,12 @@ for(const [name,role] of Object.entries(roleIds.executor)){
     execRoles[name].knownMembers[label]=await client.readContract({address:A.executor,abi:execAbi,functionName:"hasRole",args:[role,address]});
   }
 }
-const [idempotencyStore, inboxRateLimiterAllowed, inboxFeeCalculatorAllowed, allocatorOwner, allocatorOracle] = await Promise.all([
-  client.readContract({address:A.inbox,abi:inboxAbi,functionName:"IDEMPOTENCY_STORE"}),
-  client.readContract({address:A.inbox,abi:inboxAbi,functionName:"isRateLimiter",args:[A.rateLimiter]}),
-  client.readContract({address:A.inbox,abi:inboxAbi,functionName:"isFeeCalculator",args:[A.feeCalculator]}),
+const [idempotencyStore, oracleV2RateLimiterAllowed, oracleV2FeeCalculatorAllowed, allocatorOwner, allocatorOracle, oracleHub, executorHub, executorAllocator, allocatorHub] = await Promise.all([
+  client.readContract({address:A.oracleV2,abi:oracleV2Abi,functionName:"IDEMPOTENCY_STORE"}),
+  client.readContract({address:A.oracleV2,abi:oracleV2Abi,functionName:"isRateLimiter",args:[A.rateLimiter]}),
+  client.readContract({address:A.oracleV2,abi:oracleV2Abi,functionName:"isFeeCalculator",args:[A.feeCalculator]}),
   client.readContract({address:A.allocator,abi:allocAbi,functionName:"owner"}),
-  client.readContract({address:A.allocator,abi:allocAbi,functionName:"ORACLE_MULTISIG"}),
+  client.readContract({address:A.allocator,abi:allocAbi,functionName:"ORACLE_MULTISIG"}),\n  client.readContract({address:A.oracleV2,abi:oracleAbi,functionName:"HUB"}),\n  client.readContract({address:A.executor,abi:execAbi,functionName:"HUB"}),\n  client.readContract({address:A.executor,abi:execAbi,functionName:"ALLOCATOR"}),\n  client.readContract({address:A.allocator,abi:allocAbi,functionName:"HUB"}),
 ]);
 const operatorChecks={};
 for(const [label,address] of contracts){
@@ -130,7 +130,7 @@ console.log(JSON.stringify({
     OPERATOR_ROLE:await client.readContract({address:A.hub,abi:hubAbi,functionName:"getRoleAdmin",args:[roleIds.hub.OPERATOR_ROLE]}),
     EDITOR_ROLE:await client.readContract({address:A.hub,abi:hubAbi,functionName:"getRoleAdmin",args:[roleIds.hub.EDITOR_ROLE]})
   },knownContractOperatorMembership:operatorChecks},
-  inbox:{roles:inboxRoles,idempotencyStore,rateLimiter:A.rateLimiter,rateLimiterAllowed:inboxRateLimiterAllowed,feeCalculator:A.feeCalculator,feeCalculatorAllowed:inboxFeeCalculatorAllowed},
-  executor:{roles:execRoles},
-  allocator:{owner:allocatorOwner,oracleMultisig:allocatorOracle,knownAddressSuspensions:allocatorAliases},
+  oracleV2:{roles:oracleV2Roles,idempotencyStore,rateLimiter:A.rateLimiter,rateLimiterAllowed:oracleV2RateLimiterAllowed,feeCalculator:A.feeCalculator,feeCalculatorAllowed:oracleV2FeeCalculatorAllowed,hub:oracleHub,hubMatchesManifest:oracleHub.toLowerCase()===A.hub.toLowerCase()},
+  executor:{roles:execRoles,hub:executorHub,allocator:executorAllocator,hubMatchesManifest:executorHub.toLowerCase()===A.hub.toLowerCase(),allocatorMatchesManifest:executorAllocator.toLowerCase()===A.allocator.toLowerCase()},
+  allocator:{owner:allocatorOwner,hub:allocatorHub,oracleMultisig:allocatorOracle,hubMatchesManifest:allocatorHub.toLowerCase()===A.hub.toLowerCase(),knownAddressSuspensions:allocatorAliases},
 },null,2));
