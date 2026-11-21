@@ -1,0 +1,36 @@
+name: Relay settlement baseline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/relay-baseline.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  foundry-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Checkout Relay settlement v0.0.8
+        uses: actions/checkout@v4
+        with:
+          repository: relayprotocol/relay-settlement
+          ref: v0.0.8
+          path: relay-settlement
+
+      - name: Show toolchain
+        run: |
+          forge --version
+          git -C relay-settlement rev-parse HEAD
+
+      - name: Run upstream test suite
+        working-directory: relay-settlement
+        run: forge test -vvv
