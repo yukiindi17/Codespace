@@ -9,7 +9,10 @@ const allocators=[
 ];
 const event=parseAbi(["event PayloadBuilt(bytes32 indexed withdrawRequestHash,bytes payload,bytes32[] hashesToSign)"])[0];
 const usdParams=parseAbiParameters("uint8 txType,string hyperliquidChain,string destination,string amount,uint64 time");
+const usdNestedParams=parseAbiParameters("uint8 txType,(string hyperliquidChain,string destination,string amount,uint64 time) request");
 const assetParams=parseAbiParameters("uint8 txType,string hyperliquidChain,string destination,string sourceDex,string destinationDex,string token,string amount,string fromSubAccount,uint64 nonce");
+const assetNestedParams=parseAbiParameters("uint8 txType,(string hyperliquidChain,string destination,string sourceDex,string destinationDex,string token,string amount,string fromSubAccount,uint64 nonce) request");
+const bytesWrappedParams=parseAbiParameters("uint8 txType,bytes request");
 async function scan(address){
  let cursor=from,span=10_000n,out=[];
  while(cursor<=latest){const end=cursor+span-1n>latest?latest:cursor+span-1n;try{out.push(...await client.getLogs({address,event,fromBlock:cursor,toBlock:end}));cursor=end+1n}catch(e){if(span<=1n)throw new Error("PayloadBuilt scan "+cursor+"-"+end+": "+(e.shortMessage||e.message));span/=2n}}
@@ -30,6 +33,15 @@ for(const group of raw){
   }catch{}
   if(!item){
    try{const d=decodeAbiParameters(assetParams,payload);if(d[0]===1&&d[1]==="Mainnet")item={kind:"sendAsset",destination:d[2],token:d[5],amount:d[6],nonce:d[8]}}catch{}
+  }
+  if(!item){
+   try{const d=decodeAbiParameters(usdNestedParams,payload);if(d[0]===0&&d[1].hyperliquidChain==="Mainnet")item={kind:"usdSendNested",destination:d[1].destination,amount:d[1].amount,nonce:d[1].time}}catch{}
+  }
+  if(!item){
+   try{const d=decodeAbiParameters(assetNestedParams,payload);if(d[0]===1&&d[1].hyperliquidChain==="Mainnet")item={kind:"sendAssetNested",destination:d[1].destination,token:d[1].token,amount:d[1].amount,nonce:d[1].nonce}}catch{}
+  }
+  if(!item){
+   try{const d=decodeAbiParameters(bytesWrappedParams,payload);const raw=d[1];try{const x=decodeAbiParameters(usdParams,raw);if(d[0]===0&&x[1]==="Mainnet")item={kind:"usdSendBytes",destination:x[2],amount:x[3],nonce:x[4]}}catch{}if(!item){const x=decodeAbiParameters(assetParams,raw);if(d[0]===1&&x[1]==="Mainnet")item={kind:"sendAssetBytes",destination:x[2],token:x[5],amount:x[6],nonce:x[8]}}}catch{}
   }
   if(!item){ignored[group.allocator.name]++;continue}
   const ts=blockMap.get(log.blockNumber.toString());
