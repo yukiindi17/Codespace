@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/relay-baseline.yml"
       - "scripts/inject-cross-order-test.py"
+      - "scripts/inject-multicall-residual-test.py"
       - "scripts/audit-production-pool.mjs"
   workflow_dispatch:
 
@@ -56,6 +57,9 @@ jobs:
 
       - name: Inject cross-order residual-token regression PoC
         run: python3 scripts/inject-cross-order-test.py
+
+      - name: Inject cross-depository router residual regression PoC
+        run: python3 scripts/inject-multicall-residual-test.py
 
       - name: Run Relay-chain Foundry tests
         working-directory: relay-settlement/contracts/relay-chain
