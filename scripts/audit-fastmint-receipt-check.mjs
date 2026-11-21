@@ -1,4 +1,4 @@
-import { createPublicClient, http, parseAbi, getAddress, decodeFunctionData } from "viem";
+import { createPublicClient, http, parseAbi, getAddress, decodeFunctionData, decodeEventLog } from "viem";
 const client=createPublicClient({transport:http(process.env.RELAY_RPC_URL||"https://rpc.chain.relay.link",{timeout:30000})});
 const inbox=getAddress("0x30e6Cd00D0F6553884B151c1B1B74FD59369ff41");
 const limiter=getAddress("0x23AFd9E0348C058EBA84C434d9C6B508CEA764E6");
@@ -8,6 +8,14 @@ const [receipt,tx,limiterCode,inboxCode,block]=await Promise.all([
  client.getCode({address:limiter}),client.getCode({address:inbox}),client.getBlockNumber()
 ]);
 const logs=receipt.logs.map((l,i)=>({i,address:l.address,topics:l.topics,dataBytes:(l.data.length-2)/2,topic0:l.topics[0]}));
+const limiterLog=receipt.logs.find(l=>l.address.toLowerCase()===limiter.toLowerCase());
+let decodedLimiterLog=null;
+let rawTopicQuery=[];
+if(limiterLog){
+ try{decodedLimiterLog=decodeEventLog({abi:[limiterAbi[2]],data:limiterLog.data,topics:limiterLog.topics});}
+ catch(e){decodedLimiterLog={error:e.shortMessage||e.message};}
+ rawTopicQuery=await client.getLogs({address:limiter,topics:[limiterLog.topics[0]],fromBlock:receipt.blockNumber,toBlock:receipt.blockNumber});
+}
 const limiterAbi=parseAbi([
  "function getBucket(uint256 tokenId) view returns ((uint128 tokens,uint48 lastUpdated,bool isEnabled,uint128 capacity,uint128 rate) bucket)",
  "function hasRole(bytes32 role,address account) view returns (bool)",
@@ -23,7 +31,7 @@ for(const tokenId of tokenIds){try{const b=await client.readContract({address:li
 let consumerRole,consumerHasRole;
 try{consumerRole=await client.readContract({address:limiter,abi:limiterAbi,functionName:"CONSUMER_ROLE"});consumerHasRole=await client.readContract({address:limiter,abi:limiterAbi,functionName:"hasRole",args:[consumerRole,inbox]});}catch(e){consumerHasRole=e.shortMessage||e.message;}
 console.log(JSON.stringify({
- chainId:await client.getChainId(),latestBlock:block,txHash,txTo:tx.to,txFrom:tx.from,receiptStatus:receipt.status,
+ chainId:await client.getChainId(),latestBlock:block,txHash,txTo:tx.to,txFrom:tx.from,receiptStatus:receipt.status,receiptBlock:receipt.blockNumber.toString(),
  inbox,limiter,inboxCodeBytes:(inboxCode?.length-2)/2,limiterCodeBytes:(limiterCode?.length-2)/2,
- receiptLogCount:logs.length,logs,buckets,consumerRole,consumerHasRole
+ receiptLogCount:logs.length,logs,limiterLogTopic:limiterLog?.topics?.[0],decodedLimiterLog,rawTopicQueryCount:rawTopicQuery.length,buckets,consumerRole,consumerHasRole
 },(_,v)=>typeof v === 'bigint' ? v.toString() : v,2));
