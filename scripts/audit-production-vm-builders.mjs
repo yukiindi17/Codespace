@@ -19,7 +19,8 @@ const builderAbi=parseAbi([
 ]);
 const tonDepository="0xab746b034ea036b7ac5147837a57827bd3917bc3f5506d47479e87ec87ef2554";
 const hyperliquidDepository="0x66cf0aace1b4e562593bec10ec7868fba9932224";
-async function safeRead(address,abi,functionName,args=[]){try{const v=await client.readContract({address,abi,functionName,args});return typeof v==="bigint"?v.toString():v}catch(e){return "unavailable: "+(e.shortMessage||e.message)}}\nasync function builderInfo(address){
+async function safeRead(address,abi,functionName,args=[]){try{const v=await client.readContract({address,abi,functionName,args});return typeof v==="bigint"?v.toString():v}catch(e){return "unavailable: "+(e.shortMessage||e.message)}}
+async function builderInfo(address){
  const code=await client.getCode({address});
  const out={address,hasCode:!!code&&code!=="0x",runtimeBytes:code&&code!=="0x"?(code.length-2)/2:0};
  for(const [key,fn] of [["allocator","ALLOCATOR"],["chainIdHash","CHAIN_ID_HASH"],["subwalletId","SUBWALLET_ID"],["timeout","TIMEOUT"],["queryIdPeriod","QUERY_ID_PERIOD"],["queryIdsPerSecond","QUERY_IDS_PER_SECOND"],["hyperliquidChain","hyperliquidChain"]]){
