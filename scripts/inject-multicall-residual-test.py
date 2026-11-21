@@ -18,7 +18,7 @@ test = r"""
     vm.prank(admin);
     router.grantRole(depositoryRole, depositoryB);
 
-    tokenA.mint(address(router), 50);
+    tokenA.mintFor(50, address(router));
 
     // Depository A completes a multicall but fails to sweep tokenA.
     vm.prank(depository);
