@@ -20,6 +20,6 @@ for(const [name,address] of Object.entries(addresses)){
    while((pos=src.toLowerCase().indexOf(term.toLowerCase(),pos))>=0){positions.push(pos);pos+=term.length;}
    for(const i of positions.slice(-3))snippets.push({term,position:i,snippet:src.slice(Math.max(0,i-500),i+1200)});
   }
-  console.log(JSON.stringify({name,address,is_verified:j.is_verified,contract_name:j.name,compiler_version:j.compiler_version,optimization_enabled:j.optimization_enabled,implementation_address:j.implementations?.[0]?.address||j.implementation_address,abiFunctions:(j.abi||[]).filter(x=>x.type==="function").map(x=>x.name),snippets},null,2));
+  console.log(JSON.stringify({name,address,is_verified:j.is_verified,contract_name:j.name,compiler_version:j.compiler_version,optimization_enabled:j.optimization_enabled,implementation_address:j.implementations?.[0]?.address||j.implementation_address,abiFunctions:(j.abi||[]).filter(x=>x.type==="function").map(x=>x.name),buildPayloadAbi:(j.abi||[]).find(x=>x.type==="function"&&x.name==="buildPayload"),snippets},null,2));
  }catch(e){console.log(JSON.stringify({name,address,error:String(e)}))}
 }
