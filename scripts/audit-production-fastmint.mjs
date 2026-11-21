@@ -26,7 +26,7 @@ async function scanFastMintLogs(){
   }
   return out;
 }
-const logs=await scanFastMintLogs();
+const deploymentBlock=await findDeploymentBlock();\nconst logs=await scanFastMintLogs(deploymentBlock);
 const stats={fastMintEvents:logs.length,decodedTransactions:0,decodeErrors:[],zeroRateLimiterSuccess:0,zeroFeeCalculatorSuccess:0,rateLimiters:{},feeCalculators:{},samples:[]};
 const zero="0x0000000000000000000000000000000000000000";
 for(const log of logs){
@@ -63,7 +63,7 @@ const [limiterAllowed,feeCalculatorAllowed,limiterCode,feeCalculatorCode]=await 
   client.getCode({address:MANIFEST_LIMITER}),client.getCode({address:MANIFEST_FEE_CALCULATOR})
 ]);
 console.log(JSON.stringify({
-  chainId,block:latest.toString(),inbox:INBOX,stats,
+  chainId,block:latest.toString(),inbox:INBOX,deploymentBlock:deploymentBlock.toString(),stats,
   manifestModules:{
     rateLimiter:{address:MANIFEST_LIMITER,hasCode:!!limiterCode&&limiterCode!=="0x",allowlisted:limiterAllowed},
     feeCalculator:{address:MANIFEST_FEE_CALCULATOR,hasCode:!!feeCalculatorCode&&feeCalculatorCode!=="0x",allowlisted:feeCalculatorAllowed}
