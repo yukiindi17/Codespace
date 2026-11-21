@@ -34,7 +34,7 @@ jobs:
       - name: Install monorepo dependencies
         working-directory: relay-settlement
         run: yarn install --immutable
-      - name: Check old allocator, oracle and executor authority and recent usage
+      - name: Check old allocator, oracle and executor authority and recent usage (bounded scan)
         run: |
           cp scripts/audit-legacy-stack-activity.mjs relay-settlement/contracts/relay-chain/script/audit-legacy-stack-activity.mjs
           node relay-settlement/contracts/relay-chain/script/audit-legacy-stack-activity.mjs
