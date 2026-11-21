@@ -54,7 +54,8 @@ const [oldAllocatorOwner,oldAllocatorHub,oldPaused,oldExecHub,oldExecAllocator,o
 ]);
 const currentOracleRole=await client.readContract({address:A.currentInbox,abi:oracleAbi,functionName:"ORACLE_ROLE"});
 const currentSignerActive=await client.readContract({address:A.currentInbox,abi:oracleAbi,functionName:"hasRole",args:[currentOracleRole,A.currentMultisig]});
-const last100k=latest>100_000n?latest-100_000n:0n;\nconst last500k=latest>500_000n?latest-500_000n:0n;
+const last100k=latest>100_000n?latest-100_000n:0n;
+const last500k=latest>500_000n?latest-500_000n:0n;
 async function countLogs(address,event,from,to,label){
  let cursor=from,span=10_000n,total=0,first=null,last=null;
  while(cursor<=to){
