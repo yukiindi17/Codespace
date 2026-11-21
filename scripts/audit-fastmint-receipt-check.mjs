@@ -26,4 +26,4 @@ console.log(JSON.stringify({
  chainId:await client.getChainId(),latestBlock:block,txHash,txTo:tx.to,txFrom:tx.from,receiptStatus:receipt.status,
  inbox,limiter,inboxCodeBytes:(inboxCode?.length-2)/2,limiterCodeBytes:(limiterCode?.length-2)/2,
  receiptLogCount:logs.length,logs,buckets,consumerRole,consumerHasRole
-},null,2));
+},(_,v)=>typeof v === 'bigint' ? v.toString() : v,2));
