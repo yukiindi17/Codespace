@@ -26,7 +26,8 @@ async function scanFastMintLogs(){
   }
   return out;
 }
-const deploymentBlock=await findDeploymentBlock();\nconst logs=await scanFastMintLogs(deploymentBlock);
+const deploymentBlock=await findDeploymentBlock();
+const logs=await scanFastMintLogs(deploymentBlock);
 const stats={fastMintEvents:logs.length,decodedTransactions:0,decodeErrors:[],zeroRateLimiterSuccess:0,zeroFeeCalculatorSuccess:0,rateLimiters:{},feeCalculators:{},samples:[]};
 const zero="0x0000000000000000000000000000000000000000";
 for(const log of logs){
