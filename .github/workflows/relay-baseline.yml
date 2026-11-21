@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/relay-baseline.yml"
       - "scripts/inject-cross-order-test.py"
+      - "scripts/audit-production-pool.mjs"
   workflow_dispatch:
 
 permissions:
@@ -59,3 +60,8 @@ jobs:
       - name: Run Relay-chain Foundry tests
         working-directory: relay-settlement/contracts/relay-chain
         run: forge test -vvv
+
+      - name: Run read-only production FundingPool and residue audit
+        run: |
+          cp scripts/audit-production-pool.mjs relay-settlement/contracts/relay-chain/script/audit-production-pool.mjs
+          node relay-settlement/contracts/relay-chain/script/audit-production-pool.mjs
