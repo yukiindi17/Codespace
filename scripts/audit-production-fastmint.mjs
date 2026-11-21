@@ -11,8 +11,8 @@ if (chainId !== CHAIN_ID) throw new Error(`Wrong chain id ${chainId}`);
 const latest = await client.getBlockNumber();
 const abi = parseAbi([
   "event FastMint(bytes32 indexed idempotencyKey,address hubToAddress,uint256 hubTokenId,uint256 amount,uint256 feeCurrency,uint256 feeAmount,address feeRecipient,address feePayer)",
-  "function execute((bytes32 idempotencyKey,bytes[] actions,uint256 expiration) execution,address oracle,bytes signature)",
-  "function executeMultiple((bytes32 idempotencyKey,bytes[] actions,uint256 expiration)[] executions,address oracle,bytes[] signatures)",
+  "function execute((bytes32 idempotencyKey,bytes[] actions) execution,address oracle,bytes signature)",
+  "function executeMultiple((bytes32 idempotencyKey,bytes[] actions)[] executions,address oracle,bytes[] signatures)",
   "function isRateLimiter(address) view returns (bool)",
   "function isFeeCalculator(address) view returns (bool)"
 ]);
@@ -63,7 +63,7 @@ const [limiterAllowed,feeCalculatorAllowed,limiterCode,feeCalculatorCode]=await 
   client.getCode({address:MANIFEST_LIMITER}),client.getCode({address:MANIFEST_FEE_CALCULATOR})
 ]);
 console.log(JSON.stringify({
-  chainId,block:latest.toString(),inbox:INBOX,deploymentBlock:deploymentBlock.toString(),stats,
+  chainId,block:latest.toString(),oracleV2:INBOX,deploymentBlock:deploymentBlock.toString(),stats,
   manifestModules:{
     rateLimiter:{address:MANIFEST_LIMITER,hasCode:!!limiterCode&&limiterCode!=="0x",allowlisted:limiterAllowed},
     feeCalculator:{address:MANIFEST_FEE_CALCULATOR,hasCode:!!feeCalculatorCode&&feeCalculatorCode!=="0x",allowlisted:feeCalculatorAllowed}
