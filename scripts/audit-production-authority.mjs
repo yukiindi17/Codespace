@@ -82,7 +82,7 @@ const contracts = [
   ["config",A.config],["withdrawGasPayer",A.withdrawGasPayer],
   ["rateLimiter",A.rateLimiter],["feeCalculator",A.feeCalculator]
 ];
-const hubLogs=await scan(roleEvents,A.hub,"Hub role events");
+const hubLogs=(await Promise.all(roleEvents.map((event,i)=>scan(event,A.hub,"Hub role event "+i)))).flat();
 const active = {};
 for(const [name,role] of Object.entries(roleIds.hub)){
   const set=new Map();
