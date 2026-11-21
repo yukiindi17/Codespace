@@ -19,7 +19,7 @@ const limiterLog=receipt.logs.find(l=>l.address.toLowerCase()===limiter.toLowerC
 let decodedLimiterLog=null;
 let rawTopicQuery=[];
 if(limiterLog){
- try{decodedLimiterLog=decodeEventLog({abi:[limiterAbi[2]],data:limiterLog.data,topics:limiterLog.topics});}
+ try{decodedLimiterLog=decodeEventLog({abi:[limiterAbi[3]],data:limiterLog.data,topics:limiterLog.topics});}
  catch(e){decodedLimiterLog={error:e.shortMessage||e.message};}
  rawTopicQuery=await client.getLogs({address:limiter,topics:[limiterLog.topics[0]],fromBlock:receipt.blockNumber,toBlock:receipt.blockNumber});
 }
