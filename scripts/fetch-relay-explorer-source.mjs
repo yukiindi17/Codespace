@@ -15,7 +15,7 @@ for(const [name,address] of Object.entries(addresses)){
   const j=JSON.parse(raw);
   const src=typeof j.source_code==="string"?j.source_code:JSON.stringify(j.additional_sources||{});
   const snippets=[];
-  for(const term of ["nonce","seed","withdrawalsThisSecond","buildPayload","expiration"]){
+  for(const term of ["function _deriveNonce","function _buildUsdSendRequest","function _encodeUsdSendPayload","function buildPayload","withdrawalsThisSecond","seed","expiration"]){
    const i=src.toLowerCase().indexOf(term.toLowerCase());
    if(i>=0)snippets.push({term,snippet:src.slice(Math.max(0,i-300),i+900)});
   }
