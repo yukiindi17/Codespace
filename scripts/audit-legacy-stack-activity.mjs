@@ -36,7 +36,6 @@ for(const [k,a] of Object.entries(A)){if(["oldSigner","currentMultisig"].include
 const [oldAllocatorOwner,oldAllocatorHub,oldExecHub,oldExecAllocator,oldOracleHub,oldStore,currentStore,oldOracleRole,oldExecutorRole,oldOracleSignerActive,oldExecSignerActive,currentOracleActive,currentExecOldSignerActive,multiOwner,signers,threshold]=await Promise.all([
  client.readContract({address:A.legacyAllocator,abi:allocatorAbi,functionName:"owner"}),
  client.readContract({address:A.legacyAllocator,abi:allocatorAbi,functionName:"HUB"}),
- client.readContract({address:A.legacyAllocator,abi:allocatorAbi,functionName:"paused"}),
  client.readContract({address:A.legacyExecutor,abi:executorAbi,functionName:"HUB"}),
  client.readContract({address:A.legacyExecutor,abi:executorAbi,functionName:"ALLOCATOR"}),
  client.readContract({address:A.legacyOracle,abi:oracleAbi,functionName:"HUB"}),
