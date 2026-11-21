@@ -1,4 +1,4 @@
-import { createPublicClient, http, parseAbi, parseAbiParameters, decodeAbiParameters, getAddress, keccak256, stringToHex, decodeEventLog } from "viem";
+import { createPublicClient, http, parseAbi, parseAbiParameters, decodeAbiParameters, getAddress, keccak256, stringToHex, decodeFunctionData } from "viem";
 const client = createPublicClient({ transport: http(process.env.RELAY_RPC_URL || "https://rpc.chain.relay.link", { timeout: 30_000 }) });
 const chainId = await client.getChainId();
 if (chainId !== 537713) throw new Error(`Wrong chain id ${chainId}`);
@@ -8,6 +8,14 @@ const abi = parseAbi([
  "event FastMint(bytes32 indexed idempotencyKey,address hubToAddress,uint256 hubTokenId,uint256 amount,uint256 feeCurrency,uint256 feeAmount,address feeRecipient,address feePayer)",
  "event TokensConsumed(string indexed chainId,uint256 usdAmount,uint256 remaining)"
 ]);
+const executeAbi = parseAbi([
+  "function execute((bytes32 idempotencyKey,bytes[] actions,uint256 expiration) execution,address oracle,bytes signature)",
+  "function executeMultiple((bytes32 idempotencyKey,bytes[] actions,uint256 expiration)[] executions,address oracle,bytes[] signatures)"
+]);
+const wrapperAbi = parseAbi([
+  "function aggregate3((address target,bool allowFailure,bytes callData)[] calls) payable returns ((bool success,bytes returnData)[] returnData)"
+]);
+const actionParams = parseAbiParameters("uint8 actionType,address hubToAddress,uint256 hubTokenId,uint256 amount,address feeCalculator,bytes feeCalculatorData,address rateLimiter,bytes rateLimiterData");
 const latest = await client.getBlockNumber();
 const from = latest > 50000n ? latest - 50000n : 0n;
 const [fast, consumed] = await Promise.all([
