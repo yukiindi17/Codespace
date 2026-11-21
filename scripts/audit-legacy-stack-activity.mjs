@@ -63,6 +63,7 @@ async function scan(address,event,from,to,label){
  return {count:total,firstBlock:first,lastBlock:last};
 }
 const last10k=latest>10_000n?latest-10_000n:0n;
+const last10k=latest>10_000n?latest-10_000n:0n;
 const last50k=latest>50_000n?latest-50_000n:0n;
 const oldEvents=parseAbi(["event Executed(bytes32 indexed idempotencyKey,bytes[] actions)","event FastMint(bytes32 indexed idempotencyKey,address hubToAddress,uint256 hubTokenId,uint256 amount,uint256 feeCurrency,uint256 feeAmount,address feeRecipient,address feePayer)"]);
 const executorEvent=parseAbi(["event Executed(address indexed orderAddress,uint256 indexed tokenIn,uint256 indexed tokenOut,uint256 amountIn,uint256 amountOut,bytes32 withdrawRequestHash)"])[0];
