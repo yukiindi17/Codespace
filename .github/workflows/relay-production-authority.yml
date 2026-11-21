@@ -1,0 +1,40 @@
+name: Relay production authority audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/relay-production-authority.yml"
+      - "scripts/audit-production-authority.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-read-only:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout harness repository
+        uses: actions/checkout@v4
+      - name: Checkout Relay settlement v0.0.8
+        uses: actions/checkout@v4
+        with:
+          repository: relayprotocol/relay-settlement
+          ref: v0.0.8
+          path: relay-settlement
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+          cache-dependency-path: relay-settlement/yarn.lock
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install monorepo dependencies
+        working-directory: relay-settlement
+        run: yarn install --immutable
+      - name: Read production Hub, Inbox, Executor and Allocator authority state
+        run: |
+          cp scripts/audit-production-authority.mjs relay-settlement/contracts/relay-chain/script/audit-production-authority.mjs
+          node relay-settlement/contracts/relay-chain/script/audit-production-authority.mjs
